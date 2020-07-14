@@ -1,0 +1,945 @@
+*************
+Exam Tips
+*************
+
+START EXAM 
+
+> sudo -i
+> id
+> alias k=kubectl >> ~/.bashrc
+> alias kg='kubectl get' >> ~/.bashrc
+> alias kg='kubectl create' >> ~/.bashrc
+
+
+**Jai Guru Ji** 
+************************************************************
+
+
+
+
+
+
+https://medium.com/faun/be-fast-with-kubectl-1-18-ckad-cka-31be00acc443
+
+Short Question : 21,19,18,14.15,13,11,10,9,8,7,6,5,4,3,2,1
+Long Question : 23,22,20,17,16,12
+
+
+Ques with Kuber.io = 22,17,13,12,10,9,6,5,4,3
+
+Context Switch
+--------------------
+> echo $? {It should come Zero}
+> kubectl get pods --all-namespeces
+
+
+
+
+----------------------------------------------------------
+
+Schedule Exam : https://training.cncf.io/portal
+
+Kubernestes Exam link : https://portal.linuxfoundation.org/portal/kubernetes
+
+---------------------------------------------------------
+
+
+Exam login : https://www.examslocal.com/Candidate
+
+nimitsince1987
+Kuberday@9988!A
+
+1. Need to switch "Cluster" as per question requirement.---> kubectl 
+2. You can open documents from "Kubectl cheat sheet"
+3. Can open 
+
+https://github.com/kubernetes/
+https://kubernetes.io/docs/home/
+https://kubernetes.io/blog/
+
+4. For Windows: Ctrl+Insert to copy and Shift+Insert to paste. 
+5. Login to root in base machine "sudo -i"
+
+
+Ctrl+Insert to copy
+
+---------------------------------------------------------
+Hemant's Blog https://learningtechnix.wordpress.com/ 
+---------------------------------------------------------
+Kube Lab
+---------------------------------------------------------
+
+You can bootstrap a cluster as follows:
+
+ 1. Initializes cluster master node:
+
+ kubeadm init --apiserver-advertise-address $(hostname -i)
+
+
+ 2. Initialize cluster networking:
+
+ kubectl apply -n kube-system -f \
+    "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+	
+	
+	
+	
+	ETCDCTL_API=3 etcdctl snapshot save mysnapshot.db 
+	--endpoints=https://127.0.0.1:2379 
+	--cacert=/etc/kubernetes/pki/etcd/ca.crt 
+	--cert=/etc/kubernetes/pki/etcd/server.crt 
+	--key=/etc/kubernetes/pki/etcd/server.key
+	
+	
+--trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+	--cert-file=/etc/kubernetes/pki/etcd/server.crt
+	--key-file=/etc/kubernetes/pki/etcd/server.key
+
+
+ 3. (Optional) Create an nginx deployment:
+
+ kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/nginx-app.yaml
+ 
+----------------------------------------------------------
+
+ 
+
+kubeadm join 192.168.0.38:6443 --token wcgwhv.x9u15lvaq8wn0oly \
+    --discovery-token-ca-cert-hash sha256:6237705d6d0aae401d0e9db67f42666b2c24a017cbf1d55bfd4e3d7f11c919dc
+
+
+
+------------------
+1. Daemon Set 
+2. Init Continer 
+3. Multi Container
+4. node selector 
+5. create, update, rollback 
+6. port expose service
+*In V1.18 kubectl run will not create "deployement" Just Pod will create 
+7. Create YAML file, change lable, env
+
+
+
+
+--------------------------
+
+kubectl get pv --sort-by=.spec.capacity.storage > /opt/outputs/storage-capacity-sorted.txt
+
+kubectl get pv --sort-by=.spec.capacity.storage -o=custom-columns=NAME:.metadata.name,CAPACITY:.spec.capacity.storage > /opt/outputs/pv-and-capacity-sorted.txt
+(Custom Coloms)
+NAME       CAPACITY
+pv-log-4   40Mi
+pv-log-1   100Mi
+pv-log-2   200Mi
+pv-log-3   300Mi
+
+
+
+
+
+
+
+*************
+POD
+*************
+
+- Kubectl get nodes
+- Kubectl get nodes -o wide
+- kubectl version
+
+- kubectl get pods
+- kubectl get pods -o wide 
+- kubectl describe pod "Mypod"
+- kubectl run ngnix --image=ngnix
+- kubectl delete pod "Mypod"
+- kubectl create -f "pod-create.yml"
+- kubectl edit pod "mypod"
+
+- kubectl get pods --all-namespaces
+
+Default namespace : -n kube-system
+
+Selectors
+- kubectl get pods --selector env=dev
+- kubectl get all --selector env=prod,bu=finance,tier=frontend
+
+Labels
+- kubectl label node node01 color=blue
+
+
+--------------------------
+YAML template for POD
+-------------------------
+apiVersion: v1
+
+kind: Pod
+
+metadata:
+  name: myapp-pod 
+  labels:
+    app: myapp
+	
+spec:
+  containers:
+     - name: ngnix-container
+	   image: ngnix
+****************************
+
+**************
+Replicaset
+**************
+
+kubectl create -f replicaset-defination.yml
+kubectl get replicaset
+kubectl get replicaset -o wide
+kubectl get pods
+kubectl describe replicaset
+kubectl scale --replicas=3 -f replicaset-defination.yml
+
+------------------------------------------------
+> pod-defination.yml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myapp-replicaset
+  labels:
+    app: myapp
+	type: front-end
+	
+spec:
+  template:
+    
+	metadata:
+     name: myapp-pod 
+     labels:
+        app: myapp
+		type: front-end 
+	
+    spec:
+     containers:
+     - name: ngnix-container
+	   image: ngnix
+replicas: 3
+selector:
+    matchLabels: 
+       type: front-end 	
+     
+**************
+Deployment 
+**************
+
+kubectl create -f deployment-defination.yml --> Create 
+kubectl run blue --image=nginx --replicas=6
+
+Kubectl get deployments  --> get
+Kubectl get all
+
+kubectl apply -f deployment-defination.yml                       --> update
+kubectl set image deployment/myapp-deployment ngnix=ngnix:1.9.1  --> update 
+
+kubectl rollout status deployment/myapp-deployment              --> status 
+kubectl rollout history deployment/myapp-deployment             --> status 
+
+kubectl rollout undo deployment/myapp-deployment                --> Rollback
+
+
+kubectl edit deployment frontend --> Edit
+
+***************************
+Secret 
+***************************
+
+kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+
+
+
+
+***************************
+DRY RUN & YAML Conversion
+***************************
+
+kubectl create --dry-run -o yaml
+
+*****************************
+Maintainance & Paching 
+
+kubectl get node01 --ignore-daemonsets 
+kubectl uncordon node01
+kubectl cordon node03
+
+*****************************
+Upgrade
+
+apt install kubeadm=1.17.0-00
+
+kubeadm upgrade apply v1.17.0 
+apt install kubelet=1.17.0-00
+
+kubeadm upgrade node
+
+kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
+
+
+*******************************
+Deployment with Affinity
+*******************************
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blue
+spec:  
+  replicas: 6
+  selector:
+    matchLabels:
+      run: nginx
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: nginx
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+			  - key: color
+                operator: In
+                values:
+                - blue
+			  
+***********
+Limits
+***********
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-demo-2
+  namespace: mem-example
+spec:
+  containers:
+  - name: memory-demo-2-ctr
+    image: polinux/stress
+    resources:
+      requests:
+        memory: "50Mi"
+      limits:
+        memory: "100Mi"
+		
+*******************************
+Manifest- Path : /etc/kubernetes/manifests
+
+***************************************
+Logging Monitoring
+
+- Kubectl top nodes
+- Kubectl top pods
+
+- kubectl logs -f "POD/Container Name"
+
+
+--------------------
+Imperative Commands
+---------------------
+
+
+kubectl run --generator=run-pod/v1 redis --image=redis:alpine -l tier=db
+
+kubectl expose pod redis --port=6379 --name redis-service
+
+kubectl create deployment webapp --image=kodekloud/webapp-color
+kubectl scale deployment/webapp --replicas=3
+
+
+
+
+
+
+
+************
+Networking
+************
+
+1. Service 
+-------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+
+
+------------------------------------------------------------------------------------------------------------------
+************
+ETCD 
+************
+
+kubectl describe pod etcd-master -n kube-system ---> ETCD version
+
+ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt 
+--key=/etc/kubernetes/pki/etcd/server.key snapshot save /tmp/snapshot-pre-boot.db
+
+
+********************
+Security Certificate
+********************
+
+Certificate Location : /etc/kubernetes/pki
+Configration location : cat /etc/kubernetes/manifests/kube-apiserver.yaml
+
+--etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+
+
+openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text  -----> Kube-API Server Certificate Info
+openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text ----> ETCD Server Certificate Info
+
+
+openssl x509 -in /etc/kubernetes/pki/ca.crt -text 
+
+kubectl certificate accept agent-smith
+kubectl certificate deny agent-smith
+
+
+*************
+kubeconfig
+*************
+
+location : /root/.kube
+
+kubectl config view
+
+***************
+Autherization
+***************
+
+kubectl describe pod kube-apiserver-master -n kube-system
+
+kubectl auth list pods --as dev-user
+
+******Role
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+  
+*****RoleBinding
+
+apiVersion: rbac.authorization.k8s.io/v1
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
+metadata:
+  name: read-secrets-global
+subjects:
+- kind: Group
+  name: manager # Name is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+  
+  
+***************************
+Roles & Bindinds Example 2
+***************************
+
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: blue
+  name: deploy-role
+rules:
+- apiGroups: ["apps", "extensions"]
+  resources: ["deployments"]
+  verbs: ["create"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dev-user-deploy-binding
+  namespace: blue
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: deploy-role
+  apiGroup: rbac.authorization.k8s.iomaster
+
+
+********************
+ClusterRole
+*********************
+
+
+
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: Nodes
+rules:
+- apiGroups: [""]
+  #
+  # at the HTTP level, the name of the resource for accessing Secret
+  # objects is ""
+  resources: ["Nodes"]
+  verbs: ["get", "watch", "list"]
+  
+  
+apiVersion: rbac.authorization.k8s.io/v1
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
+metadata:
+  name: read-secrets-global
+subjects:
+- kind: Group
+  name: manager # Name is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: Nodes ---------------> Roles
+  apiGroup: rbac.authorization.k8s.io
+  
+  
+*************
+Network Policy
+**************
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      name: internal
+  policyTypes:
+  - Egress
+  - Ingress
+  ingress:
+    - {}
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          name: mysql
+    ports:
+    - protocol: TCP
+      port: 3306
+
+  - to:
+    - podSelector:
+        matchLabels:
+          name: payroll
+    ports:
+    - protocol: TCP
+      port: 8080
+
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+
+********************
+Volumes
+********************
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp
+spec:
+  containers:
+  - name: event-simulator
+    image: kodekloud/event-simulator    env:
+    - name: LOG_HANDLERS
+      value: file
+    volumeMounts:
+    - mountPath: /log
+      name: log-volume
+  volumes:
+  - name: log-volume
+    hostPath:
+      # directory location on host
+      path: /var/log/webapp
+      # this field is optional
+	  
+****************
+Persistance Volumes
+********************
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-log
+spec:  
+  accessModes:
+    - ReadWriteMany  
+  capacity:
+    storage: 100Mi  
+  hostPath:
+    path: /pv/log	  
+	
+********************
+Persistance Claim
+********************
+> claim-log-1
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:  
+name: claim-log-1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi
+	  
+***************************
+Persistance Volumes in Pod
+***************************
+
+apiVersion: v1
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webapp
+spec:
+  containers:
+  - name: event-simulator
+    image: kodekloud/event-simulator
+    env:
+    - name: LOG_HANDLERS
+      value: file
+    volumeMounts:
+    - mountPath: /log
+      name: log-volume
+
+  volumes:
+  - name: log-volume
+    persistentVolumeClaim:
+      claimName: claim-log-1
+
+-------------------------------------------------
+*******************************
+Networking
+*******************************
+
+
+
+--cni-bin-dir=/opt/cni/bin
+--network-plugin=cni
+
+ls /etc/cni/net.d/ -----------> Check Network type
+
+ip addr show weave 
+
+ipalloc-range:10.32.0.0/12
+
+--service-cluster-ip-range=10.96.0.0/12 
+
+kubectl logs kube-proxy-ft6n7 -n kube-system
+
+****************
+Ingress
+****************
+
+kubectl get ingress --all-namespaces
+kubectl describe ingress --namespace app-space
+
+
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: critical-space
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /pay
+        backend:
+          serviceName: pay-service
+          servicePort: 8282
+		  
+kubectl create namespace ingress-space ----> Create namespace
+kubectl create configmap nginx-configuration --namespace ingress-space ----> Configmap 
+
+kubectl create serviceaccount ingress-serviceaccount --namespace ingress-space -----> serviceaccount
+
+-----------------------------
+Ingress Controller Deployment
+-----------------------------
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-controller
+  namespace: ingress-space
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nginx-ingress
+  template:
+    metadata:
+      labels:
+        name: nginx-ingress
+    spec:
+      serviceAccountName: ingress-serviceaccount
+      containers:
+        - name: nginx-ingress-controller
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
+          args:
+            - /nginx-ingress-controller
+            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+            - --default-backend-service=app-space/default-http-backend
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+
+---------------------
+Ingress Service
+----------------------
+Name: ingress
+Type: NodePort
+Port: 80
+TargetPort: 80
+NodePort: 30080
+Use the right selector	
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress
+  namespace: ingress-space
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    nodePort: 30080
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    name: nginx-ingressmaster
+
+kubectl expose deployment -n ingress-space ingress-controller --type=NodePort --port=80 --name=ingress --dry-run -o yaml >ingress.yaml
+
+
+--------------------
+Ingress Resource
+--------------------
+
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-wear-watch
+  namespace: app-space
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /wear
+        backend:
+          serviceName: wear-service
+          servicePort: 8080
+      - path: /watch
+        backend:
+          serviceName: video-service
+          servicePort: 8080
+		  
+		  
+		  
+
+
+
+Concepts:
+https://kubernetes.io/docs/concepts/
+
+
+
+YAML LINT
+http://www.yamllint.com/ 
+
+JSON PATH
+http://jsonpath.com/
+
+Install MiniKube: https://kubernetes.io/docs/tasks/tools/install-minikube/
+MiniKube Download page for Windows: https://github.com/kubernetes/minikube/releases
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+AWS KUBEADM SETUP
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 172.31.9.155:6443 --token yv00i7.01xpqp79fn3ctjj3 \
+    --discovery-token-ca-cert-hash sha256:ea85d7a38b5f5af69876b1f5d8d8cfa7550c0f5f099064c043c8e5977ddbecd0
+	
+	
+	
+	
+kubeadm join 172.31.9.155:6443 --token nnqw5r.6kc0w2hgnlfr2s1b \
+    --discovery-token-ca-cert-hash sha256:ea85d7a38b5f5af69876b1f5d8d8cfa7550c0f5f099064c043c8e5977ddbecd0
+
+
+
+
+
+
+==========================================================================================
+KUBEADM SETUP
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 172.31.22.101:6443 --token bm6qyy.lb90m3salwhv3ujr \
+    --discovery-token-ca-cert-hash sha256:3b67f4139b052827e48077488137fe99e2441bb0235b7a498642b430440e2480 
+	
+	
+	
+[root@nimitseth3c ~]# kubectl get pods -n kube-system
+NAME                                                  READY   STATUS    RESTARTS   AGE
+coredns-66bff467f8-7rs4m                              1/1     Running   0          78m
+coredns-66bff467f8-k88tm                              1/1     Running   0          78m
+etcd-nimitseth3c.mylabserver.com                      1/1     Running   0          78m
+kube-apiserver-nimitseth3c.mylabserver.com            1/1     Running   0          78m
+kube-controller-manager-nimitseth3c.mylabserver.com   1/1     Running   0          78m
+kube-proxy-qqvms                                      1/1     Running   0          78m
+kube-proxy-swn57                                      1/1     Running   0          21m
+kube-proxy-tszkx                                      1/1     Running   0          40m
+kube-scheduler-nimitseth3c.mylabserver.com            1/1     Running   0          78m
+weave-net-7csh9                                       2/2     Running   0          12m
+weave-net-nr2s5                                       2/2     Running   0          12m
+weave-net-spg9b                                       2/2     Running   0          12m
+
+
+====================================================================================================
+
+Exam Practice
+
+
+
+[node1 ~]$ kubectl run nginx --image=nginx -o yaml
+kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed in a future version. Use kubectl run --generator=run-pod/v1 orkubectl create instead.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: "2020-06-05T11:24:59Z"
+  generation: 1
+  labels:
+    run: nginx
+  name: nginx
+  namespace: default
+  resourceVersion: "1515"
+  selfLink: /apis/apps/v1/namespaces/default/deployments/nginx
+  uid: 312d5453-a71f-11ea-8b8b-02424ce03b40
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      run: nginx
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: nginx
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
+[node1 ~]$
